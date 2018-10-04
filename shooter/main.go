@@ -12,11 +12,9 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
+	"github.com/faiface/pixel/text"
 	"golang.org/x/image/colornames"
-)
-
-const (
-	maxEnemies = 15
+	"golang.org/x/image/font/basicfont"
 )
 
 const (
@@ -38,6 +36,9 @@ var (
 	gamestate = GAMEPLAYING
 	// alphaState allows for fading out of the screen on losing
 	alphaState uint8
+	// This will increase with score
+	maxEnemies = 20
+	minEnemies = maxEnemies
 )
 
 func run() {
@@ -57,6 +58,12 @@ func run() {
 	buff := imdraw.New(nil)
 	// overlayBuff is a canvas drawn over buff
 	overlayBuff := imdraw.New(nil)
+	// Writing
+	writingCanvas := pixelgl.NewCanvas(win.Bounds())
+	atlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
+	txt := text.New(win.Bounds().Center(), atlas)
+	txt.Color = colornames.Black
+	fmt.Fprintf(txt, "You Lose!\nPress space to restart")
 
 	p = player.New(win.Bounds())
 
@@ -72,6 +79,9 @@ func run() {
 
 		switch gamestate {
 		case GAMEPLAYING:
+			// Increase enemy count based on score
+			maxEnemies = minEnemies + p.Score()/50
+
 			// Update enemies
 			for enemies.Count() < maxEnemies {
 				enemies.NewRock()
@@ -127,6 +137,9 @@ func run() {
 				alphaState++
 			}
 
+			// Write to screen
+			txt.Draw(writingCanvas, pixel.IM.Scaled(txt.Orig, 3).Moved(pixel.V(100, 150)))
+
 		case GAMERESET:
 			gamestate = GAMEPLAYING
 			enemies.ClearAll()
@@ -141,6 +154,7 @@ func run() {
 
 		buff.Draw(win)
 		overlayBuff.Draw(win)
+		writingCanvas.Draw(win, pixel.IM)
 
 		win.Update()
 
