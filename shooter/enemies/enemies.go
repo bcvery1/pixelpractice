@@ -126,6 +126,9 @@ func (r *rock) Update(dt float64) {
 	// Check if a bullet collides
 	for _, b := range bullet.AllPoints() {
 		if r.pointCollides(b) {
+			// Add the inverse of the radius as a score
+			// The smaller the rock, the harder to hit
+			consts.Scored <- int(rockMaxRadius - r.radius)
 			r.remove()
 			return
 		}

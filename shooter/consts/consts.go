@@ -19,9 +19,11 @@ const (
 
 var (
 	// PlayerSize is the size the player rect will be
-	PlayerSize = pixel.V(5, 15)
+	PlayerSize = pixel.V(15, 5)
 	src        = rand.NewSource(time.Now().UnixNano())
 	r          = rand.New(src)
+	// Scored allows thread safe score updating, without needed circlular imports
+	Scored = make(chan int, 10)
 )
 
 // GenRandVec returns a random vector where neither component has an absolute

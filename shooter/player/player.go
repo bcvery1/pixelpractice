@@ -19,10 +19,20 @@ var (
 // New creates and returns a new Phys
 // Initialise at centre of the window
 func New() *Phys {
-	return &Phys{
+	newPlayer := &Phys{
 		pos:   pixel.V(consts.WinWidth/2, consts.WinHeight/2),
 		score: 0,
 	}
+
+	// Start listening to the score
+	go func(p *Phys) {
+		for {
+			s := <-consts.Scored
+			p.score += s
+		}
+	}(newPlayer)
+
+	return newPlayer
 }
 
 // Phys holds the physics info for the player
