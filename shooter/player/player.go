@@ -1,6 +1,8 @@
 package player
 
 import (
+	"math"
+
 	"github.com/bcvery1/pixelpractice/shooter/bullet"
 	"github.com/bcvery1/pixelpractice/shooter/consts"
 	"github.com/faiface/pixel"
@@ -10,6 +12,9 @@ import (
 
 const (
 	playerSpeed float64 = 10
+	maxAcc              = 10.
+	accRate             = 25
+	slowRate            = 20
 )
 
 var (
@@ -18,10 +23,11 @@ var (
 
 // New creates and returns a new Phys
 // Initialise at centre of the window
-func New() *Phys {
+func New(bounds pixel.Rect) *Phys {
 	newPlayer := &Phys{
-		pos:   pixel.V(consts.WinWidth/2, consts.WinHeight/2),
-		score: 0,
+		pos:    pixel.V(consts.WinWidth/2, consts.WinHeight/2),
+		score:  0,
+		bounds: bounds,
 	}
 
 	// Start listening to the score
@@ -41,11 +47,14 @@ type Phys struct {
 	pos   pixel.Vec
 	score int
 	// transform allows us to rotate or otherwise manipulate the player
-	transform pixel.Matrix
+	transform    pixel.Matrix
+	acceleration pixel.Vec
+	// bounds is the rectangle that the player cannot leave
+	bounds pixel.Rect
 }
 
-// Point angles the player towards the vector
-func (p *Phys) Point(target pixel.Vec) {
+// point angles the player towards the vector
+func (p *Phys) point(target pixel.Vec) {
 	angle := p.pos.To(target).Angle()
 	p.transform = pixel.IM.Rotated(p.Centre(), angle)
 }
@@ -91,46 +100,58 @@ func (p *Phys) Centre() pixel.Vec {
 	return p.pos.Add(consts.PlayerSize.Scaled(0.5))
 }
 
+// reduceTo will reduce i to z by rate
+func reduceTo(i, rate, z float64) float64 {
+	if i == z || (math.Abs(i)-math.Abs(rate)) < math.Abs(z) {
+		return z
+	}
+
+	if i < z {
+		return i + math.Abs(rate)
+	}
+	return i - math.Abs(rate)
+}
+
+// Update updates the players position according to its' acceleration
+func (p *Phys) Update(dt float64, mousePos pixel.Vec) {
+	// Apply slow down
+	p.acceleration.X = reduceTo(p.acceleration.X, slowRate*dt, 0)
+	p.acceleration.Y = reduceTo(p.acceleration.Y, slowRate*dt, 0)
+
+	nextX := p.pos.X + p.acceleration.X
+	nextY := p.pos.Y + p.acceleration.Y
+
+	if nextX > p.bounds.Min.X && nextX < p.bounds.Max.X {
+		p.pos.X = nextX
+	}
+
+	if nextY > p.bounds.Min.Y && nextY < p.bounds.Max.Y {
+		p.pos.Y = nextY
+	}
+
+	p.point(mousePos)
+}
+
 // MoveLeft attempts to move the player left, unless the player would pass the minX
 // Returns true if it hits the minX
-func (p *Phys) MoveLeft(minX float64) bool {
-	p.pos.X -= playerSpeed
-	if p.pos.X < minX {
-		p.pos.X = minX
-		return true
-	}
-	return false
+func (p *Phys) MoveLeft(dt float64) {
+	p.acceleration.X = reduceTo(p.acceleration.X, accRate*dt, -1*maxAcc)
 }
 
 // MoveRight attempts to move the player right, unless the player would pass the maxX
 // Returns true if it hits the minX
-func (p *Phys) MoveRight(maxX float64) bool {
-	p.pos.X += playerSpeed
-	if p.pos.X > maxX-consts.PlayerSize.X {
-		p.pos.X = maxX - consts.PlayerSize.X
-		return true
-	}
-	return false
+func (p *Phys) MoveRight(dt float64) {
+	p.acceleration.X = reduceTo(p.acceleration.X, accRate*dt, maxAcc)
 }
 
 // MoveUp attempts to move the player up, unless the player would pass the maxY
 // Returns true if it hits the minX
-func (p *Phys) MoveUp(maxY float64) bool {
-	p.pos.Y += playerSpeed
-	if p.pos.Y > maxY-consts.PlayerSize.Y {
-		p.pos.Y = maxY - consts.PlayerSize.Y
-		return true
-	}
-	return false
+func (p *Phys) MoveUp(dt float64) {
+	p.acceleration.Y = reduceTo(p.acceleration.Y, accRate*dt, maxAcc)
 }
 
 // MoveDown attempts to move the player down, unless the player would pass the minY
 // Returns true if it hits the minX
-func (p *Phys) MoveDown(minY float64) bool {
-	p.pos.Y -= playerSpeed
-	if p.pos.Y < minY {
-		p.pos.Y = minY
-		return true
-	}
-	return false
+func (p *Phys) MoveDown(dt float64) {
+	p.acceleration.Y = reduceTo(p.acceleration.Y, accRate*dt, -1*maxAcc)
 }

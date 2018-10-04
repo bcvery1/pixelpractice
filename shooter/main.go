@@ -58,7 +58,7 @@ func run() {
 	// overlayBuff is a canvas drawn over buff
 	overlayBuff := imdraw.New(nil)
 
-	p = player.New()
+	p = player.New(win.Bounds())
 
 	last := time.Now()
 
@@ -82,23 +82,23 @@ func run() {
 			bullet.UpdateAll(dt)
 
 			// Point the player towards the mouse
-			p.Point(win.MousePosition())
+			p.Update(dt, win.MousePosition())
 
-			// Try move the player right
+			// Try accelerate the player right
 			if win.Pressed(pixelgl.KeyD) {
-				p.MoveRight(win.Bounds().Max.X)
+				p.MoveRight(dt)
 			}
-			// Try move player left
+			// Try accelerate player left
 			if win.Pressed(pixelgl.KeyA) {
-				p.MoveLeft(0)
+				p.MoveLeft(dt)
 			}
-			// Try move player down
+			// Try accelerate player down
 			if win.Pressed(pixelgl.KeyS) {
-				p.MoveDown(0)
+				p.MoveDown(dt)
 			}
-			// Try move player up
+			// Try accelerate player up
 			if win.Pressed(pixelgl.KeyW) {
-				p.MoveUp(win.Bounds().Max.Y)
+				p.MoveUp(dt)
 			}
 
 			if win.JustPressed(pixelgl.MouseButtonLeft) {
