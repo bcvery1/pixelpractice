@@ -30,6 +30,14 @@ func New() *Phys {
 type Phys struct {
 	pos   pixel.Vec
 	score int
+	// transform allows us to rotate or otherwise manipulate the player
+	transform pixel.Matrix
+}
+
+// Point angles the player towards the vector
+func (p *Phys) Point(target pixel.Vec) {
+	angle := p.pos.To(target).Angle()
+	p.transform = pixel.IM.Rotated(p.Centre(), angle)
 }
 
 // Rect returns the pixel rectangle for the player.
@@ -45,6 +53,7 @@ func (p *Phys) Rect() pixel.Rect {
 func (p *Phys) Draw(t pixel.Target) {
 	imd := imdraw.New(nil)
 	imd.Color = playerColour
+	imd.SetMatrix(p.transform)
 	imd.Push(p.pos, p.pos.Add(consts.PlayerSize))
 	imd.Rectangle(0)
 

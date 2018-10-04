@@ -81,6 +81,9 @@ func run() {
 
 			bullet.UpdateAll(dt)
 
+			// Point the player towards the mouse
+			p.Point(win.MousePosition())
+
 			// Try move the player right
 			if win.Pressed(pixelgl.KeyD) {
 				p.MoveRight(win.Bounds().Max.X)
