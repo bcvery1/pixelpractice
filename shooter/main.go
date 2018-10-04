@@ -78,6 +78,7 @@ func run() {
 		win.Clear(backgroundColour)
 		buff.Clear()
 		overlayBuff.Clear()
+		writingCanvas.Clear(color.Transparent)
 
 		switch gamestate {
 		case GAMEPLAYING:
