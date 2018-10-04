@@ -11,10 +11,9 @@ import (
 )
 
 const (
-	playerSpeed float64 = 10
-	maxAcc              = 10.
-	accRate             = 25
-	slowRate            = 20
+	maxAcc   = 6
+	accRate  = 12
+	slowRate = 10
 )
 
 var (
