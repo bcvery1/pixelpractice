@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	rockMaxSpeed  = 120
+	rockMinSpeed  = 120
 	rockMinRadius = 10
 	rockMaxRadius = 45
 )
@@ -70,19 +70,22 @@ func Count() int {
 
 // NewRock adds a rock to the `objects` map
 // Will be started at a random location off the screen
-func NewRock() {
+func NewRock(sinceStart float64) {
 	id := <-consts.IDs
 	radius := consts.RandRange(rockMinRadius, rockMaxRadius)
 	pos := consts.RandOffScreenPos(radius / 2)
 	rotationRate := r.Float64()
 	angle := 360 * r.Float64()
 
+	// Calculate speed based on how many seconds have passed
+	speed := rockMinSpeed + (sinceStart * 2)
+
 	// Pick a random point across the middle of the screen, aim the rock towards
 	// that.  This will ensure it is travelling in a random direction, but will
 	// always pass over the visible area
 	x := consts.RandRange(0, consts.WinWidth)
 	y := consts.RandRange(0, consts.WinHeight)
-	movement := consts.CalcSpeed(rockMaxSpeed*r.Float64(), pos, pixel.V(x, y))
+	movement := consts.CalcSpeed(speed*r.Float64(), pos, pixel.V(x, y))
 
 	rock := &rock{
 		id,
@@ -91,6 +94,7 @@ func NewRock() {
 		angle,
 		movement,
 		radius,
+		speed,
 	}
 
 	objects[id] = rock
@@ -103,6 +107,7 @@ type rock struct {
 	angle        float64
 	movement     pixel.Vec
 	radius       float64
+	speed        float64
 }
 
 func (r *rock) Pos() pixel.Vec {

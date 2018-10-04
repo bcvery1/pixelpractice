@@ -68,6 +68,8 @@ func run() {
 	p = player.New(win.Bounds())
 
 	last := time.Now()
+	// startTime is used to increase the enemy speed
+	startTime := time.Now()
 
 	for !win.Closed() {
 		dt := time.Since(last).Seconds()
@@ -84,7 +86,7 @@ func run() {
 
 			// Update enemies
 			for enemies.Count() < maxEnemies {
-				enemies.NewRock()
+				enemies.NewRock(time.Since(startTime).Seconds())
 			}
 
 			enemies.UpdateAll(dt)
