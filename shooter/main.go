@@ -58,13 +58,6 @@ func run() {
 	// overlayBuff is a canvas drawn over buff
 	overlayBuff := imdraw.New(nil)
 
-	// variables for writing losing messages to screen
-	// atlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
-	// txt := text.New(win.Bounds().Center(), atlas)
-	// txt.Color = colornames.Black
-	// fmt.Fprint(txt, "You Lost!\nPress Space to restart")
-	// txtMat := pixel.IM.Scaled(txt.Orig, 2)
-
 	p = player.New()
 
 	last := time.Now()
@@ -76,9 +69,6 @@ func run() {
 		win.Clear(backgroundColour)
 		buff.Clear()
 		overlayBuff.Clear()
-
-		enemies.DrawAll(buff)
-		bullet.DrawAll(buff)
 
 		switch gamestate {
 		case GAMEPLAYING:
@@ -124,7 +114,7 @@ func run() {
 
 			// Draw a faded background
 			imd := imdraw.New(nil)
-			imd.Color = color.RGBA{200, 200, 200, alphaState}
+			imd.Color = color.RGBA{200, 200, 200, 0x00}
 			imd.Push(pixel.ZV, win.Bounds().Max)
 			imd.Rectangle(0)
 			imd.Draw(overlayBuff)
@@ -134,9 +124,6 @@ func run() {
 				alphaState++
 			}
 
-			// Write message to screen
-			// txt.Draw(overlayBuff, txtMat)
-
 		case GAMERESET:
 			gamestate = GAMEPLAYING
 			enemies.ClearAll()
@@ -145,9 +132,13 @@ func run() {
 			alphaState = 0
 		}
 
+		enemies.DrawAll(buff)
+		bullet.DrawAll(buff)
 		p.Draw(buff)
+
 		buff.Draw(win)
 		overlayBuff.Draw(win)
+
 		win.Update()
 
 		// Calculate and display FPS
