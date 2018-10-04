@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	bulletSpeed  float64 = 700
+	bulletSpeed  float64 = 900
 	bulletRadius float64 = 1.5
 )
 
