@@ -145,7 +145,7 @@ func run() {
 		frames++
 		select {
 		case <-second:
-			win.SetTitle(fmt.Sprintf("%s | FPS: %d | Gamestate: %d", cfg.Title, frames, gamestate))
+			win.SetTitle(fmt.Sprintf("%s | FPS: %d | Score: %d", cfg.Title, frames, p.Score()))
 			frames = 0
 		default:
 		}
