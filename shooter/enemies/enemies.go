@@ -1,8 +1,6 @@
 package enemies
 
 import (
-	"bytes"
-	"image"
 	"math"
 	"math/rand"
 	"time"
@@ -10,7 +8,6 @@ import (
 	// blank import needed for loading the png rock image
 	_ "image/png"
 
-	"github.com/bcvery1/pixelpractice/shooter/bindata"
 	"github.com/bcvery1/pixelpractice/shooter/bullet"
 	"github.com/bcvery1/pixelpractice/shooter/consts"
 	"github.com/faiface/pixel"
@@ -29,7 +26,7 @@ var (
 	src        = rand.NewSource(time.Now().UnixNano())
 	r          = rand.New(src)
 	// SpriteSheet is the loaded rock picture
-	SpriteSheet = loadPicture("assets/rock.png")
+	SpriteSheet = consts.LoadPicture("assets/rock.png")
 	rockSprite  = pixel.NewSprite(SpriteSheet, SpriteSheet.Bounds())
 )
 
@@ -40,19 +37,6 @@ type target interface {
 	Update(float64)
 	Draw(pixel.Target)
 	Collides(pixel.Rect) bool
-}
-
-func loadPicture(path string) pixel.Picture {
-	file, err := bindata.Asset(path)
-	if err != nil {
-		panic(err)
-	}
-
-	img, _, err := image.Decode(bytes.NewReader(file))
-	if err != nil {
-		panic(err)
-	}
-	return pixel.PictureDataFromImage(img)
 }
 
 // ClearAll allows the game to reset all enemies and start from the beginning

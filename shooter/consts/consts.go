@@ -3,10 +3,13 @@
 package consts
 
 import (
+	"bytes"
+	"image"
 	"math"
 	"math/rand"
 	"time"
 
+	"github.com/bcvery1/pixelpractice/shooter/bindata"
 	"github.com/faiface/pixel"
 )
 
@@ -78,4 +81,17 @@ func CalcSpeed(rate float64, origin, dest pixel.Vec) pixel.Vec {
 // Clamp is a mathematical function, used in collision detection
 func Clamp(v, min, max float64) float64 {
 	return math.Min(math.Max(v, min), max)
+}
+
+func LoadPicture(path string) pixel.Picture {
+	file, err := bindata.Asset(path)
+	if err != nil {
+		panic(err)
+	}
+
+	img, _, err := image.Decode(bytes.NewReader(file))
+	if err != nil {
+		panic(err)
+	}
+	return pixel.PictureDataFromImage(img)
 }

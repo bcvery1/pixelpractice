@@ -6,7 +6,6 @@ import (
 	"github.com/bcvery1/pixelpractice/shooter/bullet"
 	"github.com/bcvery1/pixelpractice/shooter/consts"
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/imdraw"
 	"golang.org/x/image/colornames"
 )
 
@@ -18,6 +17,9 @@ const (
 
 var (
 	playerColour = colornames.Yellow
+	// SpriteSheet is the loaded ship picture
+	SpriteSheet = consts.LoadPicture("assets/ship.png")
+	shipSprite  = pixel.NewSprite(SpriteSheet, SpriteSheet.Bounds())
 )
 
 // New creates and returns a new Phys
@@ -54,7 +56,7 @@ type Phys struct {
 
 // point angles the player towards the vector
 func (p *Phys) point(target pixel.Vec) {
-	angle := p.pos.To(target).Angle()
+	angle := p.pos.To(target).Angle() - (math.Pi / 2)
 	p.transform = pixel.IM.Rotated(p.Centre(), angle)
 }
 
@@ -69,13 +71,7 @@ func (p *Phys) Rect() pixel.Rect {
 
 // Draw will draw the player shape to the target
 func (p *Phys) Draw(t pixel.Target) {
-	imd := imdraw.New(nil)
-	imd.Color = playerColour
-	imd.SetMatrix(p.transform)
-	imd.Push(p.pos, p.pos.Add(consts.PlayerSize))
-	imd.Rectangle(0)
-
-	imd.Draw(t)
+	shipSprite.Draw(t, pixel.IM.Moved(p.Centre()).Chained(p.transform))
 }
 
 // Fire creates a new bullet aimed at `target`

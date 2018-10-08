@@ -156,7 +156,7 @@ func run() {
 
 		enemies.DrawAll(rockBatch)
 		bullet.DrawAll(buff)
-		p.Draw(buff)
+		p.Draw(win)
 
 		buff.Draw(win)
 		rockBatch.Draw(win)
