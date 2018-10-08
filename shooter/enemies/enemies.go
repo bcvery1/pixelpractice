@@ -1,14 +1,19 @@
 package enemies
 
 import (
+	"bytes"
+	"image"
 	"math"
 	"math/rand"
 	"time"
 
+	// blank import needed for loading the png rock image
+	_ "image/png"
+
+	"github.com/bcvery1/pixelpractice/shooter/bindata"
 	"github.com/bcvery1/pixelpractice/shooter/bullet"
 	"github.com/bcvery1/pixelpractice/shooter/consts"
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/imdraw"
 	"golang.org/x/image/colornames"
 )
 
@@ -23,6 +28,9 @@ var (
 	rockColour = colornames.Grey
 	src        = rand.NewSource(time.Now().UnixNano())
 	r          = rand.New(src)
+	// SpriteSheet is the loaded rock picture
+	SpriteSheet = loadPicture("assets/rock.png")
+	rockSprite  = pixel.NewSprite(SpriteSheet, SpriteSheet.Bounds())
 )
 
 type target interface {
@@ -32,6 +40,19 @@ type target interface {
 	Update(float64)
 	Draw(pixel.Target)
 	Collides(pixel.Rect) bool
+}
+
+func loadPicture(path string) pixel.Picture {
+	file, err := bindata.Asset(path)
+	if err != nil {
+		panic(err)
+	}
+
+	img, _, err := image.Decode(bytes.NewReader(file))
+	if err != nil {
+		panic(err)
+	}
+	return pixel.PictureDataFromImage(img)
 }
 
 // ClearAll allows the game to reset all enemies and start from the beginning
@@ -74,8 +95,8 @@ func NewRock(sinceStart float64) {
 	id := <-consts.IDs
 	radius := consts.RandRange(rockMinRadius, rockMaxRadius)
 	pos := consts.RandOffScreenPos(radius / 2)
-	rotationRate := r.Float64()
-	angle := 360 * r.Float64()
+	rotationRate := math.Pi * r.Float64()
+	angle := math.Pi * r.Float64()
 
 	// Calculate speed based on how many seconds have passed
 	speed := rockMinSpeed + (sinceStart * 2)
@@ -139,16 +160,11 @@ func (r *rock) Update(dt float64) {
 		}
 	}
 	r.pos = r.Pos().Add(r.Movement().Scaled(dt))
-	r.angle = math.Mod((r.angle+r.RotationRate())*dt, 360)
+	r.angle = math.Mod(r.angle+(r.RotationRate()*dt), 2*math.Pi)
 }
 
 func (r *rock) Draw(t pixel.Target) {
-	imd := imdraw.New(nil)
-	imd.Color = rockColour
-	imd.Push(r.Pos())
-	imd.Circle(r.radius, 0)
-
-	imd.Draw(t)
+	rockSprite.Draw(t, pixel.IM.Moved(r.Pos()).Rotated(r.Pos(), r.angle).Scaled(r.Pos(), r.radius/26))
 }
 
 func (r *rock) Collides(rect pixel.Rect) bool {

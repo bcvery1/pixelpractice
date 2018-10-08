@@ -64,6 +64,8 @@ func run() {
 	txt := text.New(win.Bounds().Center(), atlas)
 	txt.Color = colornames.Black
 	fmt.Fprintf(txt, "You Lose!\nPress space to restart")
+	// batch to draw rock sprites to
+	rockBatch := pixel.NewBatch(&pixel.TrianglesData{}, enemies.SpriteSheet)
 
 	p = player.New(win.Bounds())
 
@@ -77,6 +79,7 @@ func run() {
 
 		win.Clear(backgroundColour)
 		buff.Clear()
+		rockBatch.Clear()
 		overlayBuff.Clear()
 		writingCanvas.Clear(color.Transparent)
 
@@ -151,11 +154,12 @@ func run() {
 			alphaState = 0
 		}
 
-		enemies.DrawAll(buff)
+		enemies.DrawAll(rockBatch)
 		bullet.DrawAll(buff)
 		p.Draw(buff)
 
 		buff.Draw(win)
+		rockBatch.Draw(win)
 		overlayBuff.Draw(win)
 		writingCanvas.Draw(win, pixel.IM)
 
