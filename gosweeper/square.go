@@ -141,7 +141,7 @@ func (s *square) reveal() {
 }
 
 func (s *square) flag() {
-	s.flagged = true
+	s.flagged = !s.flagged
 }
 
 // generateGrid creates and allocates the grid

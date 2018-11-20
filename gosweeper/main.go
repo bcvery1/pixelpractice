@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/faiface/pixel"
@@ -19,9 +18,8 @@ const (
 )
 
 var (
-	winBounds      = pixel.R(0, 0, 1280, 720)
-	defaultClicked = pixel.V(-1, -1)
-	grid           map[pixel.Rect]*square
+	winBounds = pixel.R(0, 0, 1280, 720)
+	grid      map[pixel.Rect]*square
 )
 
 func run() {
@@ -36,8 +34,6 @@ func run() {
 		panic(err)
 	}
 
-	clickedPos := defaultClicked
-
 	batch := imdraw.New(nil)
 
 	overlayCanvas := pixelgl.NewCanvas(winBounds)
@@ -51,23 +47,19 @@ func run() {
 		overlayCanvas.Clear(color.Transparent)
 		batch.Clear()
 
-		if win.JustPressed(pixelgl.MouseButtonLeft) {
-			clickedPos = win.MousePosition()
-		}
-
 		for pos, s := range grid {
-			if clickedPos != defaultClicked && pos.Contains(clickedPos) {
+			if win.JustPressed(pixelgl.MouseButtonLeft) && pos.Contains(win.MousePosition()) {
 				if s.click() {
 					gamestate = gsLost
-					fmt.Println(gamestate)
 				}
+			}
+
+			if win.JustPressed(pixelgl.MouseButtonRight) && pos.Contains(win.MousePosition()) {
+				s.flag()
 			}
 
 			s.Draw(batch, overlayCanvas)
 		}
-
-		// set clickedPos to a place off the grid
-		clickedPos = defaultClicked
 
 		batch.Draw(win)
 		overlayCanvas.Draw(win, pixel.IM)
