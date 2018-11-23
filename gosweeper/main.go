@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/faiface/pixel"
@@ -9,23 +10,24 @@ import (
 )
 
 const (
-	gridSize = 20
+	gridSize float64 = 30
 )
 
 const (
 	gsPlaying = iota
 	gsLost
+	gsWon
 )
 
 var (
-	winBounds = pixel.R(0, 0, 1280, 720)
-	grid      map[pixel.Rect]*square
+	winBounds = pixel.R(0, 0, 1200, 600)
+	grid      map[pixel.Vec]*square
 )
 
 func run() {
 	cfg := pixelgl.WindowConfig{
 		Title:  "GoSweeper",
-		Bounds: winBounds.Scaled(2),
+		Bounds: winBounds,
 		VSync:  true,
 	}
 
@@ -43,26 +45,35 @@ func run() {
 	generateGrid()
 
 	for !win.Closed() {
+		win.SetTitle(fmt.Sprintf("%s | Bombs: %d | Press 'r' to restart", cfg.Title, numBombs))
+
 		win.Clear(borderColour)
 		overlayCanvas.Clear(color.Transparent)
 		batch.Clear()
 
-		for pos, s := range grid {
-			if win.JustPressed(pixelgl.MouseButtonLeft) && pos.Contains(win.MousePosition()) {
-				if s.click() {
-					gamestate = gsLost
-				}
-			}
+		if win.JustPressed(pixelgl.KeyR) {
+			generateGrid()
+			gamestate = gsPlaying
+		}
 
-			if win.JustPressed(pixelgl.MouseButtonRight) && pos.Contains(win.MousePosition()) {
-				s.flag()
+		if win.JustPressed(pixelgl.MouseButtonLeft) && gamestate == gsPlaying {
+			if grid[vecToRowCol(win.MousePosition())].click() {
+				gamestate = gsLost
 			}
+		}
 
+		if win.JustPressed(pixelgl.MouseButtonRight) && gamestate == gsPlaying {
+			if grid[vecToRowCol(win.MousePosition())].flag() {
+				gamestate = gsWon
+			}
+		}
+
+		for _, s := range grid {
 			s.Draw(batch, overlayCanvas)
 		}
 
 		batch.Draw(win)
-		overlayCanvas.Draw(win, pixel.IM)
+		overlayCanvas.Draw(win, pixel.IM.Moved(win.Bounds().Center()))
 		win.Update()
 	}
 }
